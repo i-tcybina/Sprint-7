@@ -12,7 +12,7 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class AddCourierTest {
-
+    LoginPassword loginPassword = new LoginPassword("Test" , "1234");
     // аннотация Before показывает, что метод будет выполняться перед каждым тестовым методом
     @Before
     public void setUp() {
@@ -25,9 +25,11 @@ public class AddCourierTest {
     @Test
     public void AddCourier() {
         // метод given() помогает сформировать запрос
+        CourierLogin сourierLogin = new CourierLogin("Test", "1234","Test");
+
         Response response =given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\", \"firstName\": \"Test\"}")
+                .body(сourierLogin)
                 .when()
                 .post("/api/v1/courier");
                 response.then().assertThat().body("ok", equalTo(true))
@@ -37,10 +39,11 @@ public class AddCourierTest {
 
     @Test
     public void AddCourierNotPassword() {
+        CourierLogin сourierLogin = new CourierLogin("Test", "","Test");
         Response response =
         given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"\", \"firstName\": \"Test\"}")
+                .body(сourierLogin)
                 .when()
                 .post("/api/v1/courier");
                  response.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
@@ -48,7 +51,7 @@ public class AddCourierTest {
                 .statusCode(400);
         given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\"}")
+                .body(loginPassword)
                 .when()
                 .post("/api/v1/courier/login")
                 .then().statusCode(404);
@@ -56,10 +59,13 @@ public class AddCourierTest {
     }
     @Test
     public void AddCourierNotLogin() {
+
+        //CourierLogin CourierLogin = new CourierLogin("Test", "1234","Test");
+        CourierLogin сourierLogin = new CourierLogin("", "1234","Test");
         Response response =
                 given()
                         .header("Content-type", "application/json")
-                        .body("{\"login\": \"\", \"password\": \"1234\", \"firstName\": \"Test\"}")
+                        .body(сourierLogin)
                         .when()
                         .post("/api/v1/courier");
         response.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
@@ -67,16 +73,18 @@ public class AddCourierTest {
                 .statusCode(400);
         given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\"}")
+                .body(loginPassword)
                 .when()
                 .post("/api/v1/courier/login")
                 .then().statusCode(404);
     }
     @Test
     public void AddCourierNotFirstName() {
+
+        CourierLogin сourierLogin = new CourierLogin("Test", "1234","");
         Response response =given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\", \"firstName\": \"\"}")
+                .body(сourierLogin)
                 .when()
                 .post("/api/v1/courier");
         response.then().assertThat().body("ok", equalTo(true))
@@ -85,15 +93,16 @@ public class AddCourierTest {
       }
     @Test
     public void AddTwoIdenticalCourier() {
+        CourierLogin сourierLogin = new CourierLogin("Test", "1234","Test");
                 given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\", \"firstName\": \"Test\"}")
+                .body(сourierLogin)
                 .when()
                 .post("/api/v1/courier")
                 .then().statusCode(201);
         Response response =given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\", \"firstName\": \"Test\"}")
+                .body(сourierLogin)
                 .when()
                 .post("/api/v1/courier");
         response.then().assertThat().body("message", equalTo("Этот логин уже используется"))
@@ -104,7 +113,7 @@ public class AddCourierTest {
     public void delete() {
         Integer Id = given()
                 .header("Content-type", "application/json")
-                .body("{\"login\": \"Test\", \"password\": \"1234\"}")
+                .body(loginPassword)
                 .when()
                 .post("/api/v1/courier/login")
                 .then().extract().body().path("id");
